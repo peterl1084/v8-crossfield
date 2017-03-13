@@ -57,7 +57,7 @@ public class BinderUI extends UI {
 				.withValidator(cityZipCodeProvider::hasZipCode, "No such zip code").withValidator(crossValidator)
 				.bind(Customer::getZipCode, Customer::setZipCode);
 
-		city.addValueChangeListener(zipCodeBindinge -> zipCodeBinding.validate());
+		city.addValueChangeListener(e -> zipCodeBinding.validate());
 		zipCode.addValueChangeListener(e -> cityBinding.validate());
 
 		layout.addComponents(city, zipCode);
