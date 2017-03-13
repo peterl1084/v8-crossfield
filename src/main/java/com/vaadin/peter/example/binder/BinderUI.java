@@ -6,16 +6,20 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
-import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.BinderValidationStatus;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.peter.example.CityZipCodeProvider;
+import com.vaadin.server.UserError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * BinderUI is example UI for running the cross field validation example.
@@ -28,15 +32,19 @@ public class BinderUI extends UI {
 	@Autowired
 	private CityZipCodeProvider cityZipCodeProvider;
 
-	private VerticalLayout layout;
+	private FormLayout layout;
 	private TextField city;
 	private TextField zipCode;
+
+	private Label generalStatus;
 
 	@Override
 	protected void init(VaadinRequest request) {
 		setSizeFull();
 
-		layout = new VerticalLayout();
+		generalStatus = new Label();
+
+		layout = new FormLayout();
 		layout.setMargin(true);
 		layout.setSpacing(true);
 
@@ -58,16 +66,29 @@ public class BinderUI extends UI {
 				.bind(Customer::getZipCode, Customer::setZipCode);
 
 		binder.withValidator(crossValidator);
+		binder.setValidationStatusHandler(status -> handleValidationStatus(status));
 
 		Customer customer = new Customer();
 		binder.setBean(customer);
 
-		Label generalStatus = new Label();
-		binder.setStatusLabel(generalStatus);
+		generalStatus.setVisible(false);
+		generalStatus.setIcon(VaadinIcons.CLOSE);
 
 		layout.addComponents(city, zipCode, generalStatus);
 
 		setContent(layout);
+	}
+
+	private void handleValidationStatus(BinderValidationStatus<Customer> status) {
+		status.getFieldValidationStatuses().forEach(fieldStatus -> {
+			AbstractComponent component = (AbstractComponent) fieldStatus.getField();
+			component.setComponentError(
+					fieldStatus.isError() ? new UserError(fieldStatus.getMessage().orElse(null)) : null);
+		});
+
+		generalStatus.setVisible(status.hasErrors());
+		generalStatus.setValue(status.getValidationErrors().stream().map(error -> error.getErrorMessage())
+				.collect(Collectors.joining(",")));
 	}
 
 	private String buildDescription(List<String> availableNames) {
