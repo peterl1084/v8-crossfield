@@ -46,17 +46,18 @@ public class BinderUI extends UI {
 		zipCode = new TextField("Zip code");
 		zipCode.setDescription(buildDescription(cityZipCodeProvider.getZipCodes()), ContentMode.HTML);
 
-		CityZipCodeValidator crossValidator = new CityZipCodeValidator(cityZipCodeProvider, city, zipCode);
+		CityZipCodeValidator crossValidator = new CityZipCodeValidator(cityZipCodeProvider, city::getValue,
+				zipCode::getValue);
 
 		Binding<Customer, String> cityBinding = binder.forField(city).asRequired("City is needed")
-				.withValidator(cityName -> cityZipCodeProvider.hasCity(cityName), "No such city")
-				.withValidator(crossValidator).bind(Customer::getCity, Customer::setCity);
+				.withValidator(cityZipCodeProvider::hasCity, "No such city").withValidator(crossValidator)
+				.bind(Customer::getCity, Customer::setCity);
 
 		Binding<Customer, String> zipCodeBinding = binder.forField(zipCode).asRequired("Zip code is needed")
-				.withValidator(code -> cityZipCodeProvider.hasZipCode(code), "No such zip code")
-				.withValidator(crossValidator).bind(Customer::getZipCode, Customer::setZipCode);
+				.withValidator(cityZipCodeProvider::hasZipCode, "No such zip code").withValidator(crossValidator)
+				.bind(Customer::getZipCode, Customer::setZipCode);
 
-		city.addValueChangeListener(e -> zipCodeBinding.validate());
+		city.addValueChangeListener(zipCodeBindinge -> zipCodeBinding.validate());
 		zipCode.addValueChangeListener(e -> cityBinding.validate());
 
 		layout.addComponents(city, zipCode);
