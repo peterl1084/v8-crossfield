@@ -14,7 +14,7 @@ public interface CityZipCodeProvider {
 	 * @param city
 	 * @return Optional of zipCode String for given city name.
 	 */
-	Optional<String> getZipCodeFor(String city);
+	Optional<String> getZipCodeForCity(String city);
 
 	/**
 	 * @param zipCode

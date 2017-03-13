@@ -43,17 +43,25 @@ class Database implements CityZipCodeProvider {
 
 	@Override
 	public boolean hasZipCode(String zipCode) {
+		if (zipCode == null) {
+			return false;
+		}
+
 		return citiesToZipcodes.values().contains(zipCode);
 	}
 
 	@Override
 	public Optional<String> getCityForZipCode(String zipCode) {
+		if (zipCode == null) {
+			return Optional.empty();
+		}
+
 		return citiesToZipcodes.entrySet().stream().filter(entry -> entry.getValue().equals(zipCode)).findFirst()
 				.map(entry -> entry.getKey());
 	}
 
 	@Override
-	public Optional<String> getZipCodeFor(String city) {
+	public Optional<String> getZipCodeForCity(String city) {
 		if (city == null) {
 			return Optional.empty();
 		}

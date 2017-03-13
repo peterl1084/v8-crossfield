@@ -32,7 +32,7 @@ public class CityZipCodeValidator extends AbstractValidator<String> {
 		String cityName = cityField.getValue();
 		String zipCode = zipCodeField.getValue();
 
-		Optional<String> zipCodeFor = cityZipCodeProvider.getZipCodeFor(cityName);
+		Optional<String> zipCodeFor = cityZipCodeProvider.getZipCodeForCity(cityName);
 		if (zipCodeFor.isPresent()) {
 			if (!zipCodeFor.get().equals(zipCode)) {
 				return ValidationResult.error("Zip code doesn't match city");
