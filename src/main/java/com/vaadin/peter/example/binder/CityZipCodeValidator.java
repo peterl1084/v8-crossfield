@@ -1,7 +1,6 @@
 package com.vaadin.peter.example.binder;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.vaadin.data.ValidationResult;
 import com.vaadin.data.ValueContext;
@@ -10,44 +9,36 @@ import com.vaadin.peter.example.CityZipCodeProvider;
 
 /**
  * CityZipCodeValidator performs the crossfield validation of city and zipcode
- * through the database.
+ * through the bean.
  * 
  * @author Peter / Vaadin
  */
-public class CityZipCodeValidator extends AbstractValidator<String> {
+public class CityZipCodeValidator extends AbstractValidator<Customer> {
 	private CityZipCodeProvider cityZipCodeProvider;
 
-	private Supplier<String> city;
-	private Supplier<String> zipCode;
-
-	public CityZipCodeValidator(CityZipCodeProvider cityZipCodeProvider, Supplier<String> city,
-			Supplier<String> zipCode) {
+	public CityZipCodeValidator(CityZipCodeProvider cityZipCodeProvider) {
 		super("City and Zip code mismatch");
-
 		this.cityZipCodeProvider = cityZipCodeProvider;
-		this.city = city;
-		this.zipCode = zipCode;
 	}
 
 	@Override
-	public ValidationResult apply(String value, ValueContext context) {
-		String cityValue = city.get();
-		String zipCodeValue = zipCode.get();
+	public ValidationResult apply(Customer value, ValueContext context) {
 
-		Optional<String> zipCodeFor = cityZipCodeProvider.getZipCodeForCity(cityValue);
+		Optional<String> zipCodeFor = cityZipCodeProvider.getZipCodeForCity(value.getCity());
 		if (zipCodeFor.isPresent()) {
-			if (!zipCodeFor.get().equals(zipCodeValue)) {
+			if (!zipCodeFor.get().equals(value.getZipCode())) {
 				return ValidationResult.error("Zip code doesn't match city");
 			}
 		}
 
-		Optional<String> cityNameFor = cityZipCodeProvider.getCityForZipCode(zipCodeValue);
+		Optional<String> cityNameFor = cityZipCodeProvider.getCityForZipCode(value.getZipCode());
 		if (cityNameFor.isPresent()) {
-			if (!cityNameFor.get().equals(cityValue)) {
+			if (!cityNameFor.get().equals(value.getCity())) {
 				return ValidationResult.error("City name doesn't match zip code");
 			}
 		}
 
 		return ValidationResult.ok();
 	}
+
 }

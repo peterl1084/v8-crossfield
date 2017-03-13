@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.peter.example.CityZipCodeProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -46,21 +48,24 @@ public class BinderUI extends UI {
 		zipCode = new TextField("Zip code");
 		zipCode.setDescription(buildDescription(cityZipCodeProvider.getZipCodes()), ContentMode.HTML);
 
-		CityZipCodeValidator crossValidator = new CityZipCodeValidator(cityZipCodeProvider, city::getValue,
-				zipCode::getValue);
+		CityZipCodeValidator crossValidator = new CityZipCodeValidator(cityZipCodeProvider);
 
-		Binding<Customer, String> cityBinding = binder.forField(city).asRequired("City is needed")
-				.withValidator(cityZipCodeProvider::hasCity, "No such city").withValidator(crossValidator)
+		binder.forField(city).asRequired("City is needed").withValidator(cityZipCodeProvider::hasCity, "No such city")
 				.bind(Customer::getCity, Customer::setCity);
 
-		Binding<Customer, String> zipCodeBinding = binder.forField(zipCode).asRequired("Zip code is needed")
-				.withValidator(cityZipCodeProvider::hasZipCode, "No such zip code").withValidator(crossValidator)
+		binder.forField(zipCode).asRequired("Zip code is needed")
+				.withValidator(cityZipCodeProvider::hasZipCode, "No such zip code")
 				.bind(Customer::getZipCode, Customer::setZipCode);
 
-		city.addValueChangeListener(e -> zipCodeBinding.validate());
-		zipCode.addValueChangeListener(e -> cityBinding.validate());
+		binder.withValidator(crossValidator);
 
-		layout.addComponents(city, zipCode);
+		Customer customer = new Customer();
+		binder.setBean(customer);
+
+		Label generalStatus = new Label();
+		binder.setStatusLabel(generalStatus);
+
+		layout.addComponents(city, zipCode, generalStatus);
 
 		setContent(layout);
 	}
